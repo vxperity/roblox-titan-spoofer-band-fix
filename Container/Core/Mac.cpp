@@ -42,7 +42,6 @@ namespace MAC {
         _wsystem((cmdBase + L"enable  >nul 2>&1").c_str());
         Sleep(2000);
 
-        // Reconnect Wi-Fi to same SSID
         if (adapterName.find(L"Wi-Fi") != std::wstring::npos ||
             adapterName.find(L"Wireless") != std::wstring::npos)
         {
@@ -193,11 +192,23 @@ namespace MAC {
                         reinterpret_cast<const BYTE*>(macStr.c_str()),
                         static_cast<DWORD>((macStr.size() + 1) * sizeof(wchar_t)));
 
-                    DWORD val = 2;
+                    DWORD band = 1;
+                    FILE* pipe = _wpopen(L"netsh wlan show drivers", L"r");
+                    if (pipe) {
+                        wchar_t buf[512];
+                        std::wstring out;
+                        while (fgetws(buf, _countof(buf), pipe)) {
+                            out += buf;
+                        }
+                        _pclose(pipe);
+                        if (out.find(L"5GHz") != std::wstring::npos || out.find(L"802.11a") != std::wstring::npos)
+                            band = 3;
+                    }
+
                     RegSetValueEx(hKey, L"*PreferredBand",
                         0, REG_DWORD,
-                        reinterpret_cast<const BYTE*>(&val),
-                        sizeof(val));
+                        reinterpret_cast<const BYTE*>(&band),
+                        sizeof(band));
 
                     RegCloseKey(hKey);
 
@@ -226,7 +237,6 @@ namespace MAC {
                         << L", New MAC -> " << macStr << L"\n";
                 }
 
-                // Bounce adapter (in its own thread)
                 std::thread(&MacSpoofer::bounceAdapter, adapter).detach();
                 });
         }
@@ -241,3 +251,5 @@ namespace MAC {
         spoofMac();
     }
 }
+
+
