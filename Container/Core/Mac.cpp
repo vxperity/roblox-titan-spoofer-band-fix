@@ -1,4 +1,4 @@
-﻿#include "../Header/Mac.h"
+#include "../Header/Mac.h"
 #include "../Services/Services.hpp"
 
 namespace MAC {
@@ -42,7 +42,7 @@ namespace MAC {
         _wsystem((cmdBase + L"enable  >nul 2>&1").c_str());
         Sleep(2000);
 
-        // Reconnect Wi‑Fi to same SSID
+        // Reconnect Wi-Fi to same SSID
         if (adapterName.find(L"Wi-Fi") != std::wstring::npos ||
             adapterName.find(L"Wireless") != std::wstring::npos)
         {
@@ -183,7 +183,6 @@ namespace MAC {
                 auto newMac = TsService::genMac();
                 std::wstring macStr(newMac.begin(), newMac.end());
 
-                // Write to registry
                 HKEY hKey;
                 if (RegOpenKeyEx(HKEY_LOCAL_MACHINE,
                     regPath.c_str(),
@@ -193,9 +192,15 @@ namespace MAC {
                         0, REG_SZ,
                         reinterpret_cast<const BYTE*>(macStr.c_str()),
                         static_cast<DWORD>((macStr.size() + 1) * sizeof(wchar_t)));
+
+                    DWORD val = 2;
+                    RegSetValueEx(hKey, L"*PreferredBand",
+                        0, REG_DWORD,
+                        reinterpret_cast<const BYTE*>(&val),
+                        sizeof(val));
+
                     RegCloseKey(hKey);
 
-                    // Optional verification
                     HKEY hVerify;
                     if (RegOpenKeyEx(HKEY_LOCAL_MACHINE,
                         regPath.c_str(),
