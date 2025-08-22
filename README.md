@@ -89,6 +89,7 @@ TitanThread.join();
 
 ### IMPORTANT NOTES
 - The Spoofer does NOT unban you from specific games OR on-site bans (Eg; Roblox website bans)
+- This is a fork and only touches Mac.cpp and fixes the network band issue.
 
 ## SUPPORT
 For problems, open a support ticket via the **[TITAN Discord](https://hub.titansoftwork.net)**.  
